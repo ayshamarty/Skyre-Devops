@@ -1,0 +1,45 @@
+version: '3.3'
+services:
+    account:
+      image: ayshamarty/account-maker:latest
+      build:
+        context: ./Account-Maker
+        dockerfile: Dockerfile
+      ports:
+      - "8080:8080"
+
+    num-gen:
+      image: ayshamarty/account-num-gen-med:latest
+      build:
+        context: ./Account-Maker-Num-Gen
+        dockerfile: Dockerfile
+      ports:
+      - "8081:8081"
+
+    prize-gen:
+      image: ayshamarty/account-prize-gen:latest
+      build:
+        context: ./Account-Maker-Prize-Gen
+        dockerfile: Dockerfile
+      ports:
+      - "8082:8082"
+
+    consumer:
+      image: ayshamarty/account-consumer:latest
+      build:
+        context: ./Account-Maker-Consumer
+        dockerfile: Dockerfile
+      ports:
+      - "8084:8084"
+
+    mongo:
+      image: mongo
+      ports:
+      - "27017:27017"
+
+
+    active-mq:
+      image: webcenter/activemq
+      ports:
+      - "61616:61616"
+
