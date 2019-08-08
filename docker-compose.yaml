@@ -32,10 +32,7 @@ services:
       - "8090:8090"
 
     num-gen:
-      image: ayshamarty/account-num-gen-med:latest
-      build:
-        context: ./Account-Maker-Num-Gen-High
-        dockerfile: Dockerfile
+      image: ayshamarty/account-num-gen-low:latest
       ports:
       - "8081:8081"
 
@@ -56,6 +53,8 @@ services:
       - "8084:8084"
 
     mongo:
+      depends_on:
+      - active-mq
       image: mongo
       ports:
       - "27017:27017"
