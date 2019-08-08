@@ -32,7 +32,7 @@ services:
       - "8090:8090"
 
     num-gen:
-      image: ayshamarty/account-num-gen-high:latest
+      image: ayshamarty/account-num-gen-med:latest
       build:
         context: ./Account-Maker-Num-Gen-High
         dockerfile: Dockerfile
