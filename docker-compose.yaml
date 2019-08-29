@@ -1,67 +1,104 @@
 version: '3.3'
 services:
-
     nginx:
-      image: nginx
-      depends_on:
-      - account
-      - client
-      volumes:
-      - type: bind
-        source: ./nginx.conf
-        target: /etc/nginx/nginx.conf
-      ports:
-      - target: 80
-        protocol: tcp
-        published: 80
-
+        image: 'nginx:latest'
+        depends_on:
+            - client
+        volumes:
+            - {type: bind, source: ./nginx.conf, target: /etc/nginx/nginx.conf}
+        ports:
+            - {target: 80, published: 80, protocol: tcp}
     client:
-      image: ayshamarty/account-client:latest
-      build:
-        context: ./Account-Maker-Front-End
-        dockerfile: Dockerfile
-      ports:
-      - "3000:3000"
-
-    account:
-      image: ayshamarty/account-maker:latest
-      build:
-        context: ./Account-Maker
-        dockerfile: Dockerfile
-      ports:
-      - "8090:8090"
-
-    num-gen:
-      image: ayshamarty/account-num-gen-high:latest
-      ports:
-      - "8081:8081"
-
-    prize-gen:
-      image: ayshamarty/account-prize-gen:latest
-      build:
-        context: ./Account-Maker-Prize-Gen
-        dockerfile: Dockerfile
-      ports:
-      - "8082:8082"
-
+        depends_on:
+            - user
+        image: localhost:5000/skyre-client
+        build:
+            context: ./Skyre-FrontEnd
+            dockerfile: Dockerfile
+        ports:
+            - {target: 3000, published: 3000, protocol: tcp}
+    user:
+        image: localhost:5000/skyre-user
+        depends_on:
+          - core
+          - db
+        build:
+            context: ./Skyre_User
+            dockerfile: Dockerfile
+        ports:
+            - {target: 9003, published: 9003, protocol: tcp}
+    core:
+        image: localhost:5000/skyre-core
+        build:
+            context: ./Skyre-SpringCore
+            dockerfile: Dockerfile
+        ports:
+            - {target: 9001, published: 9001, protocol: tcp}
+    anpr:
+        image: localhost:5000/skyre-anpr
+        build:
+            context: ./SpringANPRAPI
+            dockerfile: Dockerfile
+        ports:
+            - {target: 8082, published: 8082, protocol: tcp}
+    citizen:
+        image: localhost:5000/skyre-citizen
+        build:
+            context: ./SpringCitizenAPI2
+            dockerfile: Dockerfile
+        ports:
+            - {target: 8081, published: 8081, protocol: tcp}
+    finance:
+        image: localhost:5000/skyre-finance
+        build:
+            context: ./SpringFinanceAPI
+            dockerfile: Dockerfile
+        ports:
+            - {target: 8083, published: 8083, protocol: tcp}
+    mobile:
+        image: localhost:5000/skyre-mobile
+        build:
+            context: ./SpringMobileAPI
+            dockerfile: Dockerfile
+        ports:
+            - {target: 8084, published: 8084, protocol: tcp}
+    case:
+        image: localhost:5000/skyre-case
+        build:
+            context: ./Skyre-Case
+            dockerfile: Dockerfile
+        ports:
+            - {target: 8085, published: 8085, protocol: tcp}
+        depends_on:
+            - mongo
     consumer:
-      image: ayshamarty/account-consumer:latest
-      build:
-        context: ./Account-Maker-Consumer
-        dockerfile: Dockerfile
-      ports:
-      - "8084:8084"
-
+        depends_on:
+            - activemq
+        image: localhost:5000/skyre-consumer
+        build:
+            context: ./Skyre-Consumer
+            dockerfile: Dockerfile
+        ports:
+            - {target: 9002, published: 9002, protocol: tcp}
     mongo:
-      depends_on:
-      - active-mq
-      image: mongo
-      ports:
-      - "27017:27017"
-
-
-    active-mq:
-      image: webcenter/activemq
-      ports:
-      - "61616:61616"
-
+        depends_on:
+            - activemq
+        image: mongo
+        ports:
+            - {target: 27017, published: 27017, protocol: tcp}
+    activemq:
+        image: webcenter/activemq
+        ports:
+            - {target: 61616, published: 61616, protocol: tcp}
+    db:
+        image: 'mysql:5.7'
+        restart: always
+        environment:
+            MYSQL_ROOT_PASSWORD: example
+            MYSQL_DATABASE: users
+            MYSQL_USER: test
+            MYSQL_PASSWORD: test1234
+        ports:
+            - '3306:3306'
+        volumes:
+            - './docker/data/db:/var/lib/mysql'
